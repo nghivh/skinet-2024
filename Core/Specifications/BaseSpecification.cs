@@ -1,4 +1,5 @@
 using System;
+using System.Dynamic;
 using System.Linq.Expressions;
 using Core.Interfaces;
 
@@ -14,6 +15,12 @@ public class BaseSpecification<T>(Expression<Func<T, bool>>? criteria) : ISpecif
     public Expression<Func<T, object>>? OrderByDescending {get; private set;}
     public bool IsDistinct {get; private set;}
 
+    public int Skip {get; private set;}
+
+    public int Take {get; private set;}
+
+    public bool IsPagingEnabled {get; private set;}
+
     protected void ApplyDistinct(){
         IsDistinct = true;
     }
@@ -23,6 +30,22 @@ public class BaseSpecification<T>(Expression<Func<T, bool>>? criteria) : ISpecif
 
     protected void AddOrderByDescending(Expression<Func<T, object>>? orderByDescExpression){
         OrderByDescending = orderByDescExpression;
+    }
+
+    protected void ApplyPaging(int skip, int take)
+    {
+        Skip = skip;
+        Take = take;
+        IsPagingEnabled = true;        
+    }
+
+    public IQueryable<T> ApplyCriteria(IQueryable<T> query)
+    {
+        if(Criteria != null){
+            query = query.Where(Criteria);
+        }
+
+        return query;
     }
 }
 
